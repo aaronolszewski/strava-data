@@ -1,4 +1,4 @@
-all: requirements database data createuser runserver
+all: clean requirements database data createuser runserver
 
 requirements:
 	pip install -r requirements.txt
@@ -17,4 +17,7 @@ createuser:
 runserver:
 	./manage.py runserver
 
-.PHONY: requirements data database createuser runserver
+clean:
+	-find . -type f -name "*.pyc" -delete
+
+.PHONY: requirements data database createuser runserver clean
