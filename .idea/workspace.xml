@@ -55,18 +55,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="get-data.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/strava/get-data.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#28#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strava/models.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -79,7 +67,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="get-data.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="get-data.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/get-data.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="111">
@@ -111,7 +99,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="settings.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datawarehouse/settings.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="468">
@@ -758,9 +746,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="182">
           <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -800,6 +786,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/datawarehouse/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="126" column="0" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/get-data.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="111">
@@ -807,14 +801,6 @@
           <folding>
             <element signature="e#0#28#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/datawarehouse/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="126" column="0" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
