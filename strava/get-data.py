@@ -2,16 +2,10 @@ from stravalib import Client
 import psycopg2
 from ConfigParser import SafeConfigParser
 import warnings
-import django
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "datawarehouse.settings")
-django.setup()
-from strava.models import Strava
-from datawarehouse.settings import APP_NAME
 
+from models import Strava
 
 class StravaData(object):
-
     """
     Class which holds all of our Strava API attributes along with conversion / helper methods
     """
@@ -115,7 +109,6 @@ class StravaData(object):
 
 
 class DBConnection(object):
-
     """
     Class for getting DB Connections
     """
@@ -130,7 +123,6 @@ class DBConnection(object):
         self.section = section
         warnings.filterwarnings("ignore")
         self.strava = StravaData()
-        self.table = APP_NAME + '_' + Strava.__name__.lower()
 
     def get_config_details(self):
         """
@@ -189,26 +181,26 @@ class DBConnection(object):
                              feet=int(summary['feet']),
                              cal=int(summary['calories']))
 
-    @staticmethod
-    def get_field_names(model):
-        fields = [fields.name for fields in model._meta.get_fields()]
-        return fields
-
-    @staticmethod
-    def get_placement_holders(fields):
-        return ",".join('%s' for x in fields)
-
     def insert_data(self):
         """
         Method which inserts our data
         """
-        fields = self.get_field_names(model=Strava)
-        holders = self.get_placement_holders(fields)
-        sql = "insert into {table_name} ({fields}) values ({holders})".format(table_name=self.table,
-                                                                              fields=",".join(fields),
-                                                                              holders=holders)
+        import pdb; pdb.set_trace()
         activities = self.strava.get_activities()
-        rows = self.execute_sql(sql=sql, data=activities, executemany=True)
+        rows = self.execute_sql("""insert into {tablename}
+        (activity_id,
+        name,
+        _date,
+        distance_miles,
+        avg_power,
+        moving_time_seconds,
+        elapsed_time_seconds,
+        kudos_count,
+        elevation_feet,
+        kilojoules) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        on conflict (activity_id) do update
+        set name=excluded.name,
+        kudos_count=excluded.kudos_count""".format(tablename=self.strava.tablename), activities, executemany=True)
         print "{rows} rows inserted!".format(rows=rows)
         self.summary_printout(activities)
 
