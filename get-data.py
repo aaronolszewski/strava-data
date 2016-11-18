@@ -97,7 +97,11 @@ class Strava(object):
                               self.time_in_seconds(active.elapsed_time),
                               active.kudos_count,
                               self.metres_to_feet(active.total_elevation_gain),
-                              active.kilojoules))
+                              active.kilojoules,
+                              active.location_city,
+                              active.location_country,
+                              active.start_longitude,
+                              active.start_latitude))
             if len(ride_info) % 100 == 0:
                 print "{rows} rides processed so far...".format(rows=len(ride_info))
         return ride_info

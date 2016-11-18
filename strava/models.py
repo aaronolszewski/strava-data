@@ -17,3 +17,8 @@ class Strava(models.Model):
     kudos_count = models.IntegerField(null=True, blank=True)
     elevation_feet = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
     kilojoules = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    country = models.TextField(null=True)
+    city = models.TextField(null=True)
+    latitude = models.FloatField(null=True)
+    longitude = models.TextField(null=True)
+

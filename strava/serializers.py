@@ -6,4 +6,9 @@ class StravaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Strava
         fields = ('activity_id',
-                  'name')
+                  'name',
+                  '_date',
+                  'distance_miles',
+                  'city',
+                  'country',
+                  'kilojoules')
