@@ -11,5 +11,5 @@ class StravaView(ListAPIView):
     serializer_class = StravaSerializer
 
     def get_queryset(self):
-        queryset = self.model.objects.filter(activity_id=295793685).select_related()
+        queryset = self.model.objects.all()
         return queryset
