@@ -5,6 +5,7 @@ from django.db import models
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "datawarehouse.settings")
 
+
 class Strava(models.Model):
     """
     Model which holds all of my cycling data
