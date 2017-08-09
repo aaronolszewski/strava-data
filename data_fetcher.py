@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from stravalib import Client
 import psycopg2
 from ConfigParser import SafeConfigParser
@@ -103,10 +105,12 @@ class StravaConnector(object):
                               activity.kudos_count,
                               self.metres_to_feet(activity.total_elevation_gain),
                               activity.kilojoules,
-                              activity.location_city,
                               activity.location_country,
+                              activity.location_city,
                               activity.start_longitude,
-                              activity.start_latitude))
+                              activity.start_latitude,
+                              activity.trainer,
+                              activity.total_photo_count))
             if len(ride_info) % 100 == 0:
                 print "{rows} rides processed so far...".format(rows=len(ride_info))
         return ride_info
@@ -172,7 +176,7 @@ class DBConnection(object):
         """
         fields = self.get_field_names(model=Strava)
         holders = self.get_placement_holders(fields)
-        sql = "insert into {table_name} ({fields}) values ({holders})".format(
+        sql = "insert into {table_name} ({fields}) values ({holders}) on conflict (activity_id) do nothing".format(
             table_name=self.table, fields=",".join(fields), holders=holders
         )
         rows = self.execute_sql(sql=sql, data=data, executemany=True)
@@ -189,24 +193,28 @@ def summary_printout(user_details, activity_list):
     summary = {'activities': len(activity_list),
                'miles': sum(i[3] for i in activity_list if i[3] is not None),
                'feet': sum(i[8] for i in activity_list if i[8] is not None),
-               'calories': sum(i[9] for i in activity_list if i[9] is not None)}
+               'calories': sum(i[9] for i in activity_list if i[9] is not None),
+               'min_date': min(i[2] for i in activity_list if i[2] is not None),
+               'max_date': max(i[2] for i in activity_list if i[2] is not None)}
     message = \
         """Hello {first_name} {last_name}. You have {followers} followers on Strava\n
-        You have recorded {act:,} activities\n
+        You have recorded {act:,} activities between {min_date} and {max_date}\n
         Cycled {miles:,} miles\n
         Climbed {feet:,} feet\n
         Burned {cal:,} calories"""
 
-    print message.format(first_name=user_details['first_name'],
-                         last_name=user_details['last_name'],
-                         followers=user_details['followers'],
-                         act=summary['activities'],
-                         miles=int(summary['miles']),
-                         feet=int(summary['feet']),
-                         cal=int(summary['calories']))
+    return message.format(first_name=user_details['first_name'],
+                          last_name=user_details['last_name'],
+                          followers=user_details['followers'],
+                          act=summary['activities'],
+                          miles=int(summary['miles']),
+                          feet=int(summary['feet']),
+                          cal=int(summary['calories']),
+                          min_date=summary['min_date'],
+                          max_date=summary['max_date'])
 
 if __name__ == '__main__':
     strava = StravaConnector()
     activities = strava.get_activities()
     DBConnection('config.conf', 'local').insert_data(data=activities)
-    summary_printout(user_details=strava.get_details(), activity_list=activities)
+    print summary_printout(user_details=strava.get_details(), activity_list=activities)

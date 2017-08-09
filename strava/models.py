@@ -24,4 +24,6 @@ class Strava(models.Model):
     city = models.TextField(null=True)
     latitude = models.FloatField(null=True)
     longitude = models.TextField(null=True)
+    is_stationary_trainer = models.BooleanField(default=False)
+    photo_count = models.IntegerField(default=0)
 
