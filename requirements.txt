@@ -9,3 +9,5 @@ requests==2.11.1
 six==1.10.0
 stravalib==0.6.0
 units==0.6
+pytest==3.2.1
+mock==2.0.0
