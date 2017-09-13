@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from stravalib import Client
 import psycopg2
 from ConfigParser import SafeConfigParser
@@ -22,15 +21,28 @@ class StravaConnector(object):
         """
         Instantiate the class by entering your access token
         """
-        self.token = raw_input("Please enter your token here:")
+        self.token = self.get_access_token()
         self.tablename = APP_NAME + Strava.__name__.lower()
+
+    def get_access_token(self):
+        token = os.environ.get('STRAVA_ACCESS_TOKEN')
+        if token:
+            return token
+        else:
+            raw_input("Please enter your token here:")
 
     def get_connection(self):
         """
         Method to connect to the Strava API given a access token
         :return: connection
         """
-        return Client(access_token=self.token)
+        conn = Client(access_token=self.token)
+        try:
+            conn.protocol.get('/athlete')
+        except Exception as e:
+            print "Authorisation Error: {error}".format(error=e)
+            raise e
+        return conn
 
     def get_details(self):
         """
@@ -149,6 +161,11 @@ class DBConnection(object):
         """
         return psycopg2.connect(**self.get_config_details())
 
+    def fetch_all_rows(self, sql):
+        cursor = self.connect().cursor()
+        cursor.execute(sql)
+        return cursor.fetchall()
+
     def execute_sql(self, sql, data=None, executemany=False):
 
         conn = self.connect()
@@ -170,14 +187,16 @@ class DBConnection(object):
     def get_placement_holders(fields):
         return ",".join('%s' for x in fields)
 
-    def insert_data(self, data):
+    def insert_data(self, data, update_fields):
         """
         Method which inserts our data
         """
         fields = self.get_field_names(model=Strava)
         holders = self.get_placement_holders(fields)
-        sql = "insert into {table_name} ({fields}) values ({holders}) on conflict (activity_id) do nothing".format(
-            table_name=self.table, fields=",".join(fields), holders=holders
+        fields_to_update = ", ".join("{field}=excluded.{field}".format(field=field) for field in update_fields)
+        sql = """insert into {table_name} ({fields}) values ({holders}) on conflict (activity_id) do update
+        set {update_columns}""".format(
+            table_name=self.table, fields=",".join(fields), holders=holders, update_columns=fields_to_update
         )
         rows = self.execute_sql(sql=sql, data=data, executemany=True)
         print "{rows} rows inserted!".format(rows=rows)
@@ -216,5 +235,5 @@ def summary_printout(user_details, activity_list):
 if __name__ == '__main__':
     strava = StravaConnector()
     activities = strava.get_activities()
-    DBConnection('config.conf', 'local').insert_data(data=activities)
+    DBConnection('config.conf', 'local').insert_data(data=activities, update_fields=['kudos_count', 'photo_count', 'name'])
     print summary_printout(user_details=strava.get_details(), activity_list=activities)
