@@ -24,12 +24,13 @@ class StravaConnector(object):
         self.token = self.get_access_token()
         self.tablename = APP_NAME + Strava.__name__.lower()
 
-    def get_access_token(self):
+    @staticmethod
+    def get_access_token():
         token = os.environ.get('STRAVA_ACCESS_TOKEN')
         if token:
             return token
         else:
-            raw_input("Please enter your token here:")
+            return raw_input("Please enter your token here:")
 
     def get_connection(self):
         """
@@ -129,7 +130,6 @@ class StravaConnector(object):
 
 
 class DBConnection(object):
-
     """
     Class for getting DB Connections
     """
@@ -161,23 +161,16 @@ class DBConnection(object):
         """
         return psycopg2.connect(**self.get_config_details())
 
-    def fetch_all_rows(self, sql):
-        cursor = self.connect().cursor()
-        cursor.execute(sql)
-        return cursor.fetchall()
-
     def execute_sql(self, sql, data=None, executemany=False):
+        with self.connect() as conn:
+            with conn.cursor() as cursor:
+                if data:
+                    cursor.executemany(sql, data) if executemany else cursor.execute(sql, data)
+                    conn.commit()
+                    return cursor.rowcount
 
-        conn = self.connect()
-        cursor = conn.cursor()
-        if data:
-            cursor.executemany(sql, data) if executemany else cursor.execute(sql, data)
-            conn.commit()
-            return cursor.rowcount
-
-        cursor.execute(sql)
-        conn.commit()
-        return cursor.rowcount
+                cursor.execute(sql)
+                return cursor.rowcount
 
     @staticmethod
     def get_field_names(model):
@@ -194,12 +187,22 @@ class DBConnection(object):
         fields = self.get_field_names(model=Strava)
         holders = self.get_placement_holders(fields)
         fields_to_update = ", ".join("{field}=excluded.{field}".format(field=field) for field in update_fields)
-        sql = """insert into {table_name} ({fields}) values ({holders}) on conflict (activity_id) do update
-        set {update_columns}""".format(
+        sql = "insert into {table_name} ({fields}) " \
+              "values ({holders}) on conflict (activity_id) do update set {update_columns}".format(
             table_name=self.table, fields=",".join(fields), holders=holders, update_columns=fields_to_update
         )
         rows = self.execute_sql(sql=sql, data=data, executemany=True)
         print "{rows} rows inserted!".format(rows=rows)
+
+
+def calculate_list_index(index, activity_list, calc=sum):
+    """
+    :param index:
+    :param activity_list:
+    :param calc:
+    :return: calculation for a given index in a list
+    """
+    return calc(activity[index] for activity in activity_list if activity[index] is not None)
 
 
 def summary_printout(user_details, activity_list):
@@ -210,11 +213,11 @@ def summary_printout(user_details, activity_list):
     :return: message containing our stats
     """
     summary = {'activities': len(activity_list),
-               'miles': sum(i[3] for i in activity_list if i[3] is not None),
-               'feet': sum(i[8] for i in activity_list if i[8] is not None),
-               'calories': sum(i[9] for i in activity_list if i[9] is not None),
-               'min_date': min(i[2] for i in activity_list if i[2] is not None),
-               'max_date': max(i[2] for i in activity_list if i[2] is not None)}
+               'miles': calculate_list_index(index=3, activity_list=activity_list),
+               'feet': calculate_list_index(index=8, activity_list=activity_list),
+               'calories': calculate_list_index(index=9, activity_list=activity_list),
+               'min_date': calculate_list_index(index=2, activity_list=activity_list, calc=min),
+               'max_date': calculate_list_index(index=2, activity_list=activity_list, calc=max)}
     message = \
         """Hello {first_name} {last_name}. You have {followers} followers on Strava\n
         You have recorded {act:,} activities between {min_date} and {max_date}\n
