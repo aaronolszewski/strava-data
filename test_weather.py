@@ -106,20 +106,20 @@ def test_build_url(city_id_mocker, api_key_mocker, weather_obj, city_id = 100):
 
 @mock.patch('weather.Weather.build_url')
 @mock.patch('weather.requests.get')
-def test_get_weather_data(response_mocker, url_mocker, weather_obj):
+def test_get_weather_data(response_mocker, url_mocker, weather_obj_with_default_city):
     url_mocker.return_value = 'http://mockurl'
     response_mocker.return_value = mock.MagicMock(ok=True)
     response_mocker.return_value.json.return_value = MOCKED_JSON_RESPONSE
-    assert weather_obj().get_weather_data() == MOCKED_JSON_RESPONSE
+    assert weather_obj_with_default_city.get_weather_data() == MOCKED_JSON_RESPONSE
 
 
 @mock.patch('weather.Weather.build_url')
 @mock.patch('weather.requests.get')
-def test_get_weather_data_with_failed_response(response_mocker, url_mocker, weather_obj):
+def test_get_weather_data_with_failed_response(response_mocker, url_mocker, weather_obj_with_default_city):
     url_mocker.return_value = 'http://mockurl'
     response_mocker.return_value = mock.MagicMock(ok=False)
     with pytest.raises(weather.APIException):
-        assert weather_obj().get_weather_data()
+        assert weather_obj_with_default_city.get_weather_data()
 
 
 def test_degrees_to_compass(weather_obj):
